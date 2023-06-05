@@ -16,8 +16,8 @@ function App() {
 
   const loadData = async () => {
     let response = await fetch(
-      // "https://flight-status-backend.vercel.app/api/getStatus",
-      "http://localhost:5000/api/getStatus",
+      "https://flight-status-backend.vercel.app/api/getStatus",
+      // "http://localhost:5000/api/getStatus",
 
       {
         method: "POST",
