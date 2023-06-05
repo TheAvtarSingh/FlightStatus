@@ -8,3 +8,9 @@
 .input-width {
   width: 25vw;
 }
+.container-border {
+  border: 2px black dotted;
+}
+.container-double-border {
+  border: 2px black double;
+}

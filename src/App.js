@@ -1,23 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
-
+import { useAuth0 } from "@auth0/auth0-react";
 function App() {
+  const [status, setstatus] = useState([]);
+  const { loginWithRedirect } = useAuth0();
   const [data, setdata] = useState({
     Source: "",
     Destination: "",
     Date: "",
   });
+  const { user, isAuthenticated, logout } = useAuth0();
 
   const onChange = (event) => {
     setdata({ ...data, [event.target.name]: [event.target.value] });
   };
-
-  const [output, setOutput] = useState([]);
+  const handleForm = (e) => {
+    e.preventDefault();
+    loadData();
+  };
 
   const loadData = async () => {
     let response = await fetch(
-      "https://flight-status-backend.vercel.app/api/getStatus",
-      // "http://localhost:5000/api/getStatus",
+      // "https://flight-status-backend.vercel.app/api/getStatus",
+      "http://localhost:5000/api/getStatus",
 
       {
         method: "POST",
@@ -31,23 +36,38 @@ function App() {
         }),
       }
     );
-    response = await response.json();
-    setOutput(response);
+    const opts = await response.json();
+
+    setstatus(opts);
   };
 
-  const handleForm = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
     loadData();
-    console.log(output);
-  };
+  }, []);
 
   return (
     <>
       <div className="row d-flex bg-dark text-light ">
         <h1 className="d-flex justify-content-end align-items-end me-3">
-          <button className="btn btn-success m-2">
-            <strong>Login</strong>
-          </button>
+          {isAuthenticated ? (
+            <button
+              className="btn btn-success m-2"
+              onClick={() => loginWithRedirect()}
+            >
+              <strong>Login</strong>
+            </button>
+          ) : (
+            <div>
+              <button
+                className="btn btn-success m-2"
+                onClick={() =>
+                  logout({ logoutParams: { returnTo: window.location.origin } })
+                }
+              >
+                <strong>Logout</strong>
+              </button>
+            </div>
+          )}
         </h1>
       </div>
       <div className="row">
@@ -106,38 +126,65 @@ function App() {
         </div>
         <div className="col full-height-container bg-info-subtle row input-background">
           <div className="d-flex justify-content-center align-items-center bg-info-subtle">
-            <div className="container">
-              <form
-                method="post"
-                className="d-flex flex-column align-items-center m-2"
-              >
-                <label htmlFor="from" className="m-2 form-label">
-                  <strong> from</strong>
-                </label>
-                <input
-                  type="text"
-                  className="form-control input-background input-width m-2"
-                  name="from"
-                  id="from"
-                  required
-                />
-                <label htmlFor="to" className="m-2 form-label">
-                  to
-                </label>
-                <input
-                  type="text"
-                  name="to"
-                  id="to"
-                  className="form-control input-background mb-3 input-width m-2"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="btn btn-primary input-width m-2"
-                >
-                  Check Flights
-                </button>
-              </form>
+            <div className="container container-double-border">
+              {" "}
+              <h2 className="mb-2 fw-bold">Current Flights Status </h2>
+              <div className="row  container-border m-1">
+                <div className="col">
+                  <h4>Sno.</h4>
+                </div>
+                <div className="col">
+                  <h4>Source</h4>
+                </div>
+                <div className="col">
+                  <h4>Destination</h4>
+                </div>
+                <div className="col">
+                  <h4>Flight</h4>
+                </div>
+                <div className="col">
+                  <h4>Date</h4>
+                </div>
+              </div>
+              <div className="row  container-double-border m-1">
+                <div className="row">
+                  <div className="col text-center container-border m-1">
+                    <h4 className="text-center">
+                      {status.map((status, index) => (
+                        <p>{index + 1}</p>
+                      ))}
+                    </h4>
+                  </div>
+                  <div className="col text-center">
+                    <h4 className="text-center  container-border m-1">
+                      {status.map((status) => (
+                        <p>{status.Source}</p>
+                      ))}
+                    </h4>
+                  </div>
+                  <div className="col text-center">
+                    <h4 className="text-center  container-border m-1">
+                      {status.map((status) => (
+                        <p>{status.Destination}</p>
+                      ))}
+                    </h4>
+                  </div>
+                  <div className="col text-center">
+                    <h4 className="text-center  container-border m-1">
+                      {status.map((status) => (
+                        <p>{status.Flight}</p>
+                      ))}
+                    </h4>
+                  </div>
+                  <div className="col text-center">
+                    <h4 className="text-center  container-border m-1">
+                      {status.map((status) => (
+                        <p>{status.Price}</p>
+                      ))}
+                    </h4>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
